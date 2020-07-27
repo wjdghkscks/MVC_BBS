@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="guestbook2">
+
+<!-- 페이징 기법 사용 시 해당 sql 사용 X
+	<select id="list" resultType="com.ict.db.BVO">
+		SELECT * FROM bbs_t ORDER BY b_idx desc
+	</select>
+-->
+	
+<!-- 전체 게시글의 수 (totalRecord) 구하기 -->
+	<select id="count" resultType="int">
+		SELECT COUNT(*) FROM bbs_t
+	</select>
+	
+<!-- 리스트(시작번호, 끝번호) 선택 -->
+	<select id="p_list" parameterType="map" resultType="com.ict.db.BVO">
+	 	SELECT * FROM (
+	 	      SELECT rownum r_num , a.* 
+  					FROM (
+  					    SELECT * FROM bbs_t ORDER BY b_idx DESC
+  					) a 
+  				) WHERE r_num BETWEEN #{begin} AND #{end} 
+	</select>
+	
+	<insert id="write" parameterType="com.ict.db.BVO">
+		INSERT INTO bbs_t
+		VALUES(bbs_t_seq.nextval, #{subject}, #{writer}, #{content},
+				#{file_name}, #{pwd}, SYSDATE, 0)
+	</insert>
+
+<!-- 조회수 업데이트 -->
+	<update id="hitup" parameterType="String">
+		UPDATE bbs_t SET hit = (hit + 1) WHERE b_idx = #{b_idx}
+	</update>
+
+	<select id="onelist" parameterType="String"
+		resultType="com.ict.db.BVO">
+		SELECT * FROM bbs_t WHERE b_idx = #{b_idx}
+	</select>
+
+	<delete id="delete" parameterType="String">
+		DELETE FROM bbs_t WHERE b_idx = #{b_idx}
+	</delete>
+
+	<update id="update" parameterType="com.ict.db.BVO">
+		UPDATE bbs_t SET subject = #{subject}, writer = #{writer},
+						content = #{content}, file_name = #{file_name}
+		WHERE b_idx = #{b_idx}
+	</update>
+
+<!-- 댓글 불러오기 -->
+	<select id="c_list" parameterType="String"
+		resultType="com.ict.db.CVO">
+		SELECT * FROM comment_t WHERE b_idx = #{b_idx} 
+		ORDER BY c_idx desc
+	</select>
+
+<!-- 댓글 쓰기 -->
+	<insert id="c_write" parameterType="com.ict.db.CVO">
+		INSERT INTO comment_t VALUES(comment_t_seq.nextval, #{writer}, #{content}, 
+									#{pwd}, sysdate, #{b_idx})
+	</insert>
+	
+<!-- 댓글 삭제 -->
+	<delete id="c_delete" parameterType="String">
+		DELETE FROM comment_t WHERE c_idx = #{c_idx}
+	</delete>
+	
+<!-- 게시글 삭제를 위한 관련 댓글 전체 삭제 -->
+	<delete id="c_alldelete" parameterType="String">
+		DELETE FROM comment_t WHERE b_idx = #{b_idx}
+	</delete>
+
+
+</mapper>
