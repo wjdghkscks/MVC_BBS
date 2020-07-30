@@ -50,7 +50,7 @@ public class ListCommand implements Command {
 		} else {
 			paging.setNowPage(Integer.parseInt(cPage));
 		}
-		
+		 
 	// 4. 현재 페이지의 시작 번호와 끝 번호 구하기
 		paging.setBegin( (paging.getNowPage() - 1) * paging.getNumPerPage() + 1 );
 		paging.setEnd( (paging.getBegin() - 1) + paging.getNumPerPage() );
